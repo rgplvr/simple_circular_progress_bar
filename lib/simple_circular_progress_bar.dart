@@ -14,8 +14,8 @@ double _degToRad(double degree) {
   return degree * _piDiv180;
 }
 
-/// The callback type to get a new text value centered in the progress bar.
-typedef OnGetCenterText = Text Function(double);
+/// The callback type to get a new widget  centered in the progress bar.
+typedef OnGetCenterWidget = Widget Function();
 
 /// Simple circular progress bar.
 ///
@@ -60,7 +60,7 @@ class SimpleCircularProgressBar extends StatefulWidget {
 
   /// Callback to generate a new Text widget located in the center of the
   /// progress bar. The callback input is the current value of the bar progress.
-  final OnGetCenterText? onGetText;
+  final OnGetCenterWidget? onGetCenterWidget;
 
   /// Create simple circular progress bar.
   ///
@@ -92,8 +92,8 @@ class SimpleCircularProgressBar extends StatefulWidget {
   /// to [fullProgressColor]. If no [fullProgressColor] is specified, the last
   /// color from [progressColors] is taken.
   ///
-  /// Center text. If you want the text with its value to be displayed in the
-  /// center of the progress bar, define the [onGetText] method. In this method
+  /// Center widget. If you want a widget to be  displayed in the
+  /// center of the progress bar, define the [OnGetCenterWidget] method. In this method
   /// you should return the Text widget for the current progress bar value.
   const SimpleCircularProgressBar({
     Key? key,
@@ -108,12 +108,11 @@ class SimpleCircularProgressBar extends StatefulWidget {
     this.animationDuration = const Duration(seconds: 6),
     this.mergeMode = false,
     this.valueNotifier,
-    this.onGetText,
+    this.onGetCenterWidget,
   }) : super(key: key);
 
   @override
-  _SimpleCircularProgressBarState createState() =>
-      _SimpleCircularProgressBarState();
+  _SimpleCircularProgressBarState createState() => _SimpleCircularProgressBarState();
 }
 
 class _SimpleCircularProgressBarState extends State<SimpleCircularProgressBar>
@@ -178,13 +177,12 @@ class _SimpleCircularProgressBarState extends State<SimpleCircularProgressBar>
       colors: progressColors,
     );
 
-    fullProgressColor = (widget.fullProgressColor == null)
-        ? progressColors.last
-        : widget.fullProgressColor!;
+    fullProgressColor =
+        (widget.fullProgressColor == null) ? progressColors.last : widget.fullProgressColor!;
 
     // Create animation.
-    final animationDuration = (widget.animationDuration.inMicroseconds < 0) ?
-      Duration() : widget.animationDuration;
+    final animationDuration =
+        (widget.animationDuration.inMicroseconds < 0) ? Duration() : widget.animationDuration;
 
     animationController = AnimationController(
       vsync: this,
@@ -257,18 +255,18 @@ class _SimpleCircularProgressBarState extends State<SimpleCircularProgressBar>
 
             // Create center text widget.
             // If no callback is defined, create an empty widget.
-            Widget centerTextWidget;
-            if (widget.onGetText != null) {
-              centerTextWidget = widget.onGetText!(animationController.value);
+            Widget centerWidget;
+            if (widget.onGetCenterWidget != null) {
+              centerWidget = widget.onGetCenterWidget!();
             } else {
-              centerTextWidget = const SizedBox.shrink();
+              centerWidget = const SizedBox.shrink();
             }
 
             // Repaint progress bar.
             return Stack(
               alignment: Alignment.center,
               children: [
-                centerTextWidget,
+                centerWidget,
                 Transform.rotate(
                   angle: _degToRad(widget.startAngle - 90),
                   child: CustomPaint(
